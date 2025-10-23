@@ -34,6 +34,7 @@ function updateButton() {
 function handleRangeUpdate() {
     // Sets the corresponding video property (volume or playbackRate) 
     // using the input's 'name' and 'value'.
+    // Note: The HTML input name "playbackSpeed" maps directly to video.playbackRate
     video[this.name] = this.value;
 }
 
@@ -81,8 +82,9 @@ video.addEventListener('timeupdate', handleProgress);
 skipButtons.forEach(button => button.addEventListener('click', skip));
 
 // Sliders (Volume and Speed)
+// 'change' for when slider stops, 'mousemove' for real-time adjustments
 ranges.forEach(range => range.addEventListener('change', handleRangeUpdate));
-ranges.forEach(range => range.addEventListener('mousemove', handleRangeUpdate)); // For real-time feedback
+ranges.forEach(range => range.addEventListener('mousemove', handleRangeUpdate)); 
 
 // Scrubbing Functionality
 progress.addEventListener('click', scrub);
