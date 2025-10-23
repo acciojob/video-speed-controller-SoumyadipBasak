@@ -14,18 +14,14 @@ let mousedown = false;
 
 /**
  * Toggles the video state between play and pause.
- * Also updates the button text to show the current state (► or ❚ ❚).
  */
 function togglePlay() {
-    if (video.paused) {
-        video.play();
-    } else {
-        video.pause();
-    }
+    // Uses the video API's play() and pause() methods
+    video.paused ? video.play() : video.pause();
 }
 
 /**
- * Updates the play/pause button text based on the video's state.
+ * Updates the play/pause button text (► or ❚ ❚).
  */
 function updateButton() {
     const icon = video.paused ? '►' : '❚ ❚';
@@ -36,16 +32,16 @@ function updateButton() {
  * Handles volume and playbackSpeed changes from the range sliders.
  */
 function handleRangeUpdate() {
-    // 'this.name' will be 'volume' or 'playbackSpeed'
-    // 'this.value' will be the value from the slider
+    // Sets the corresponding video property (volume or playbackRate) 
+    // using the input's 'name' and 'value'.
     video[this.name] = this.value;
 }
 
 /**
- * Handles skipping/rewinding the video using the skip buttons.
+ * Handles skipping/rewinding the video (10s back / 25s forward).
  */
 function skip() {
-    // 'this.dataset.skip' gets the value from data-skip attribute (e.g., -10 or 25)
+    // Adds the 'data-skip' value (e.g., -10 or 25) to the current time.
     video.currentTime += parseFloat(this.dataset.skip);
 }
 
@@ -53,18 +49,18 @@ function skip() {
  * Updates the progress bar width based on the video's current time.
  */
 function handleProgress() {
-    // Calculate the percentage of video completion
+    // Calculates the percentage of video completion.
     const percent = (video.currentTime / video.duration) * 100;
+    // Uses flex-basis to control the width of the progress bar fill.
     progressBar.style.flexBasis = `${percent}%`;
 }
 
 /**
- * Allows the user to seek a new position in the video by clicking or dragging on the progress bar.
- * @param {Event} e - The mouse event (click/mousemove).
+ * Allows the user to seek a new position in the video (scrubbing).
  */
 function scrub(e) {
     if (mousedown) {
-        // Calculate the new time based on the click position relative to the progress bar width
+        // Calculates the seek time: (click position / progress bar width) * total duration
         const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
         video.currentTime = scrubTime;
     }
@@ -72,31 +68,26 @@ function scrub(e) {
 
 // 3. Attach Event Listeners
 
-// Play/Pause functionality
+// Play/Pause
 video.addEventListener('click', togglePlay);
 toggle.addEventListener('click', togglePlay);
+video.addEventListener('play', updateButton); // Updates button to ❚ ❚
+video.addEventListener('pause', updateButton); // Updates button to ►
 
-// Update button icon when video starts/pauses
-video.addEventListener('play', updateButton);
-video.addEventListener('pause', updateButton);
-
-// Progress Bar update
+// Progress Bar
 video.addEventListener('timeupdate', handleProgress);
 
-// Skip buttons
+// Skip Buttons
 skipButtons.forEach(button => button.addEventListener('click', skip));
 
-// Sliders (Volume and Playback Speed)
+// Sliders (Volume and Speed)
 ranges.forEach(range => range.addEventListener('change', handleRangeUpdate));
-// Use 'mousemove' for real-time adjustments (like volume/speed feedback)
-ranges.forEach(range => range.addEventListener('mousemove', handleRangeUpdate));
+ranges.forEach(range => range.addEventListener('mousemove', handleRangeUpdate)); // For real-time feedback
 
-
-// Progress Bar seeking (Scrubbing)
+// Scrubbing Functionality
 progress.addEventListener('click', scrub);
-progress.addEventListener('mousemove', (e) => scrub(e)); // Calls scrub on move
+// Attach mousemove only when mousedown is true
 progress.addEventListener('mousedown', () => mousedown = true);
 progress.addEventListener('mouseup', () => mousedown = false);
-
-// Also stop scrubbing if mouse leaves the progress bar area while held down
-progress.addEventListener('mouseleave', () => mousedown = false);
+progress.addEventListener('mousemove', scrub); 
+progress.addEventListener('mouseleave', () => mousedown = false); // Prevents seeking after dragging mouse out
